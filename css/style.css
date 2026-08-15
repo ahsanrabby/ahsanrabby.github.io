@@ -175,6 +175,11 @@ nav ul li a:hover::after {
     color: #ffefb3;
 }
 
+#skills a {
+    text-decoration: none;
+    color: #ffefb3;
+}
+
 #experience a {
     text-decoration: none;
     color: #ffefb3;
