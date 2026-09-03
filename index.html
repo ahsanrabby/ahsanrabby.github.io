@@ -10,7 +10,7 @@
 
     <!-- Standard SEO Meta Tags -->
     <meta name="description" content="Official portfolio of Ahsan Rabby - Computer Science and Engineering student, Backend developer, and tech enthusiast.">
-    <meta name="keywords" content="Ahsan Rabby,ahsanrabby, ahsan-rabby,ahsanrabby.git,  Ahsan Rabby Portfolio, Ahsan Rabby CSE, Ahsan Rabby PHP/Laravel Developer">
+    <meta name="keywords" content="Ahsan Rabby,ahsanrabby, ahsan-rabby,ahsanrabby.git, ahsanrabby,  Ahsan Rabby Portfolio, Ahsan Rabby CSE, Ahsan Rabby PHP/Laravel Developer">
     <meta name="author" content="Ahsan Rabby">
 
     <meta property="og:type" content="website">
@@ -35,19 +35,19 @@
 
                 <ul id="sidemenu">
                     <li>
-                        <a href="#header"> </a>Home</a>
+                        <a href="#header">Home</a>
                     </li>
                     <li>
-                        <a href="#about"> </a>About</a>
+                        <a href="#about">About</a>
                     </li>
                     <li>
-                        <a href="#services"> </a>Services</a>
+                        <a href="#services">Services</a>
                     </li>
                     <li>
-                        <a href="#portfolio"></a>Portfolio</a>
+                        <a href="#portfolio">Portfolio</a>
                     </li>
                     <li>
-                        <a href="#contact"></a>Contact</a>
+                        <a href="#contact">Contact</a>
                     </li>
                     <i class="fa-solid fa-xmark" onclick="closemenu()"></i>
                 </ul>
@@ -191,15 +191,59 @@
                     <a href="images/CV_of_Ahsan_Rabby(instructor).pdf" download class="btn btn2"><i class="fa-solid fa-arrow-down"></i> Download CV</a>
                 </div>
                 <div class="contact-right">
-                    <span id="msg"></span>
-                    <form action="" name="submit-to-google-sheet">
-                        <input type="text" name="name" placeholder=" your name" required>
-                        <input type="email" name="email" placeholder="Enter your email" required>
-                        <textarea name="message" rows="6" placeholder=" your message"></textarea>
-                        <button type="submit" class="btn btn2">Submit</button>
-                    </form>
-                    <span id="msg"></span>
-                </div>
+
+    <span id="msg"></span>
+
+    <form name="submit-to-google-sheet">
+
+        <input type="text"
+               name="name"
+               placeholder="Your name"
+               required>
+
+        <input type="email"
+               name="email"
+               id="email"
+               placeholder="Enter your email"
+               required>
+
+        <textarea name="message"
+                  rows="6"
+                  placeholder="Your message"
+                  required></textarea>
+
+
+        <!-- Send OTP Button -->
+        <button type="submit"
+                id="submitBtn"
+                class="btn btn2">
+            Send OTP
+        </button>
+
+
+        <!-- OTP Verification Section -->
+        <div id="otp-section" style="display:none;">
+
+            <input type="text"
+                   id="otp"
+                   maxlength="6"
+                   inputmode="numeric"
+                   placeholder="Enter 6-digit OTP"
+                   autocomplete="one-time-code">
+
+            <button type="button"
+                    id="verifyBtn"
+                    class="btn btn2">
+                Verify Email
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
             </div>
         </div>
         <div class="copyright">
@@ -232,29 +276,511 @@
             sidemenu.style.right = "-200px";
         }
     </script>
+<script>
 
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwxrFu3TBVGWJ0ToFoJOFPKTuXLyoE4oW-pADygLoC-ycD-J5Y-d2puS1V11V4Fdzif/exec'
-        const form = document.forms['submit-to-google-sheet']
-        const msg = document.getElementById("msg")
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxo02d7wpO0W6HHKJoD-GV3s0m7pe6XtDnRV1IF7YlQ6Rz4gK5Tsr-ORnDPzGz8l83G/exec';
 
-        form.addEventListener('submit', e => {
-            e.preventDefault()
-            fetch(scriptURL, {
-                    method: 'POST',
-                    body: new FormData(form)
-                })
-                .then(response => {
-                    msg.innerHTML = "Message Sent Successfully!"
-                    setTimeout(function() {
-                        msg.innerHTML = ""
+const form = document.forms['submit-to-google-sheet'];
+const msg = document.getElementById('msg');
 
-                    }, 5000)
-                    form.reset()
-                })
-                .catch(error => console.error('Error!', error.message))
-        })
-    </script>
+const otpSection = document.getElementById('otp-section');
+const otpInput = document.getElementById('otp');
+const verifyBtn = document.getElementById('verifyBtn');
+const submitBtn = document.getElementById('submitBtn');
+
+let otpSent = false;
+
+
+// =====================================
+// SEND OTP
+// =====================================
+
+form.addEventListener('submit', function(e) {
+
+    e.preventDefault();
+
+    if (otpSent) {
+        return;
+    }
+
+    const name = form.elements['name'].value.trim();
+    const email = form.elements['email'].value.trim();
+    const message = form.elements['message'].value.trim();
+
+
+    // Check empty fields
+    if (!name || !email || !message) {
+
+        msg.innerHTML = 'Please fill in all fields.';
+
+        return;
+    }
+
+
+    // Email format validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
+
+        msg.innerHTML = 'Please enter a valid email address.';
+
+        return;
+    }
+
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Sending OTP...';
+
+    msg.innerHTML = 'Please wait...';
+
+
+    const data = new URLSearchParams();
+
+    data.append('action', 'sendOTP');
+    data.append('name', name);
+    data.append('email', email);
+    data.append('message', message);
+
+
+    fetch(scriptURL, {
+
+        method: 'POST',
+
+        body: data
+
+    })
+
+    .then(response => {
+
+        console.log('OTP HTTP STATUS:', response.status);
+
+        return response.text();
+
+    })
+
+    .then(text => {
+
+        console.log('OTP RAW RESPONSE:', text);
+
+        let result;
+
+        try {
+
+            result = JSON.parse(text);
+
+        } catch (error) {
+
+            console.error('OTP JSON ERROR:', error);
+
+            msg.innerHTML =
+                'Server returned an invalid response.';
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Send OTP';
+
+            return;
+        }
+
+
+        console.log('OTP RESULT:', result);
+
+
+        if (result.result === 'otp_sent') {
+
+            otpSent = true;
+
+            msg.innerHTML =
+                'OTP sent! Please check your email.';
+
+            otpSection.style.display = 'block';
+
+            submitBtn.style.display = 'none';
+
+            otpInput.focus();
+
+        } else {
+
+            msg.innerHTML =
+                result.message || 'Could not send OTP.';
+
+            submitBtn.disabled = false;
+
+            submitBtn.innerHTML = 'Send OTP';
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error('OTP FETCH ERROR:', error);
+
+        msg.innerHTML =
+            'Something went wrong: ' + error.message;
+
+        submitBtn.disabled = false;
+
+        submitBtn.innerHTML = 'Send OTP';
+
+    });
+
+});
+
+
+// =====================================
+// VERIFY OTP
+// =====================================
+
+verifyBtn.addEventListener('click', function(e) {
+
+    e.preventDefault();
+
+    console.log('VERIFY BUTTON CLICKED');
+
+
+    const email =
+        form.elements['email'].value.trim();
+
+    const otp =
+        otpInput.value.trim();
+
+
+    console.log('Email:', email);
+    console.log('OTP:', otp);
+
+
+    // Check email
+    if (!email) {
+
+        msg.innerHTML =
+            'Email is missing.';
+
+        return;
+    }
+
+
+    // Check OTP
+    if (!otp) {
+
+        msg.innerHTML =
+            'Please enter the OTP.';
+
+        otpInput.focus();
+
+        return;
+    }
+
+
+    // OTP must be 6 digits
+    if (!/^\d{6}$/.test(otp)) {
+
+        msg.innerHTML =
+            'OTP must be 6 digits.';
+
+        otpInput.focus();
+
+        return;
+    }
+
+
+    verifyBtn.disabled = true;
+
+    verifyBtn.innerHTML =
+        'Verifying...';
+
+    msg.innerHTML =
+        'Verifying your email...';
+
+
+    const data =
+        new URLSearchParams();
+
+
+    data.append(
+        'action',
+        'verifyOTP'
+    );
+
+    data.append(
+        'email',
+        email
+    );
+
+    data.append(
+        'otp',
+        otp
+    );
+
+
+    fetch(scriptURL, {
+
+        method: 'POST',
+
+        body: data
+
+    })
+
+    .then(response => {
+
+        console.log(
+            'VERIFY HTTP STATUS:',
+            response.status
+        );
+
+        return response.text();
+
+    })
+
+    .then(text => {
+
+        console.log(
+            'VERIFY RAW RESPONSE:',
+            text
+        );
+
+
+        let result;
+
+
+        try {
+
+            result =
+                JSON.parse(text);
+
+        } catch (error) {
+
+            console.error(
+                'VERIFY JSON ERROR:',
+                error
+            );
+
+            msg.innerHTML =
+                'Server returned an invalid response.';
+
+            verifyBtn.disabled = false;
+
+            verifyBtn.innerHTML =
+                'Verify Email';
+
+            return;
+        }
+
+
+        console.log(
+            'VERIFY RESULT:',
+            result
+        );
+
+
+        if (result.result === 'success') {
+
+            msg.innerHTML =
+                'Email verified successfully!';
+
+
+            verifyBtn.innerHTML =
+                'Verified ✓';
+
+
+            // Save message to Google Sheet
+            saveMessage();
+
+
+        } else {
+
+            msg.innerHTML =
+                result.message ||
+                'Invalid OTP.';
+
+
+            verifyBtn.disabled = false;
+
+            verifyBtn.innerHTML =
+                'Verify Email';
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            'VERIFY FETCH ERROR:',
+            error
+        );
+
+
+        msg.innerHTML =
+            'Verification error: ' +
+            error.message;
+
+
+        verifyBtn.disabled = false;
+
+        verifyBtn.innerHTML =
+            'Verify Email';
+
+    });
+
+});
+
+
+// =====================================
+// SAVE MESSAGE TO GOOGLE SHEET
+// =====================================
+
+function saveMessage() {
+
+    console.log(
+        'Saving message to Google Sheet...'
+    );
+
+
+    const data =
+        new URLSearchParams();
+
+
+    data.append(
+        'action',
+        'saveMessage'
+    );
+
+    data.append(
+        'name',
+        form.elements['name'].value.trim()
+    );
+
+    data.append(
+        'email',
+        form.elements['email'].value.trim()
+    );
+
+    data.append(
+        'message',
+        form.elements['message'].value.trim()
+    );
+
+
+    fetch(scriptURL, {
+
+        method: 'POST',
+
+        body: data
+
+    })
+
+    .then(response => {
+
+        console.log(
+            'SAVE HTTP STATUS:',
+            response.status
+        );
+
+        return response.text();
+
+    })
+
+    .then(text => {
+
+        console.log(
+            'SAVE RAW RESPONSE:',
+            text
+        );
+
+
+        let result;
+
+
+        try {
+
+            result =
+                JSON.parse(text);
+
+        } catch (error) {
+
+            console.error(
+                'SAVE JSON ERROR:',
+                error
+            );
+
+            msg.innerHTML =
+                'Invalid server response.';
+
+            return;
+        }
+
+
+        console.log(
+            'SAVE RESULT:',
+            result
+        );
+
+
+        if (result.result === 'success') {
+
+            msg.innerHTML =
+                'Message sent successfully!';
+
+
+            form.reset();
+
+
+            otpSection.style.display =
+                'none';
+
+
+            otpSent = false;
+
+
+            verifyBtn.disabled =
+                false;
+
+
+            verifyBtn.innerHTML =
+                'Verify Email';
+
+
+            submitBtn.style.display =
+                'inline-block';
+
+
+            submitBtn.disabled =
+                false;
+
+
+            submitBtn.innerHTML =
+                'Send OTP';
+
+
+        } else {
+
+            msg.innerHTML =
+                result.message ||
+                'Message could not be saved.';
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            'SAVE FETCH ERROR:',
+            error
+        );
+
+
+        msg.innerHTML =
+            'Something went wrong while saving.';
+
+    });
+
+}
+
+</script>
+
+
+
 </body>
 
 </html>
